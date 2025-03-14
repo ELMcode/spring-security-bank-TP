@@ -2,13 +2,12 @@ package com.m2ibank.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "customer_id")
     private int id;
 
@@ -27,7 +26,6 @@ public class Customer {
     @Column(name = "create_dt")
     private String createDt;
 
-   
     public int getId() {
         return id;
     }
@@ -83,6 +81,5 @@ public class Customer {
     public void setCreateDt(String createDt) {
         this.createDt = createDt;
     }
-
 
 }
