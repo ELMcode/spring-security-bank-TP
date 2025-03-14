@@ -2,6 +2,7 @@ package com.m2ibank.controller;
 
 import com.m2ibank.model.Accounts;
 import com.m2ibank.repository.AccountsRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,15 +15,15 @@ public class AccountController {
     private AccountsRepository accountsRepository;
 
     @GetMapping("/myAccount")
-    public List <Accounts> getAccountDetails(@RequestParam int id) {
-       List<Accounts> accounts = accountsRepository.findByCustomerId(id);
-        if (accounts != null ) {
+    public List<Accounts> getAccountDetails(HttpServletRequest request) {
+        Integer userId = (Integer) request.getAttribute("userId");
+        List<Accounts> accounts = accountsRepository.findByCustomerId(userId);
+        if (accounts != null) {
             return accounts;
-        }else {
+        } else {
             return null;
         }
     }
-
 
     @PostMapping("/createAccount")
     public Accounts createAccount(@RequestBody Accounts account) {

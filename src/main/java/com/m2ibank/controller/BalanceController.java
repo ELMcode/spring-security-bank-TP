@@ -2,6 +2,7 @@ package com.m2ibank.controller;
 
 import com.m2ibank.model.AccountTransactions;
 import com.m2ibank.repository.AccountTransactionsRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +15,13 @@ public class BalanceController {
     private AccountTransactionsRepository accountTransactionsRepository;
 
     @GetMapping("/myBalance")
-    public List<AccountTransactions> getBalanceDetails(@RequestParam int id) {
-        List<AccountTransactions> accountTransactions = accountTransactionsRepository.
-                findByCustomerIdOrderByTransactionDtDesc(id);
-        if (accountTransactions != null ) {
+    public List<AccountTransactions> getBalanceDetails(HttpServletRequest request) {
+        Integer userId = (Integer) request.getAttribute("userId");
+        List<AccountTransactions> accountTransactions = accountTransactionsRepository
+                .findByCustomerIdOrderByTransactionDtDesc(userId);
+        if (accountTransactions != null) {
             return accountTransactions;
-        }else {
+        } else {
             return null;
         }
     }

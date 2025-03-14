@@ -1,14 +1,11 @@
 package com.m2ibank.controller;
 
-
 import com.m2ibank.model.*;
 import com.m2ibank.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-
 
 @RestController
 @RequestMapping("/admin")
@@ -26,6 +23,8 @@ public class AdminController {
     @Autowired
     private AccountTransactionsRepository accountTransactionsRepository;
 
+    @Autowired
+    private CustomerRepository customerRepository;
 
     @GetMapping("/loans")
     public Iterable<Loans> getAllLoans() {
@@ -47,6 +46,10 @@ public class AdminController {
         return accountTransactionsRepository.findAll();
     }
 
+    @GetMapping("/users")
+    public Iterable<Customer> getAllUsers() {
+        return customerRepository.findAll();
+    }
 
 }
 
