@@ -1,0 +1,91 @@
+package com.m2ibank.config.jwt;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
+import com.m2ibank.config.security.CustomerUserDetails;
+
+import javax.crypto.SecretKey;
+import java.util.Base64;
+import java.util.Date;
+import java.util.stream.Collectors;
+
+@Component
+public class JwtTokenProvider {
+
+    @Autowired
+    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    @Value("${jwt.secret}")
+    private String secret;
+
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateToken(Authentication auth) {
+        String username = auth.getName();
+        Date currentDate = new Date();
+        Date expireDate = new Date(currentDate.getTime() + 86400000); // 24 heures
+
+        String roles = auth.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .collect(Collectors.joining(","));
+
+        Integer userId = null;
+        if (auth.getPrincipal() instanceof CustomerUserDetails) {
+            userId = ((CustomerUserDetails) auth.getPrincipal()).getId();
+        }
+
+        String token = Jwts.builder()
+                .setSubject(username)
+                .claim("roles", roles)
+                .claim("userId", userId)
+                .setIssuedAt(new Date())
+                .setExpiration(expireDate)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+
+        return token;
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception ex) {
+            throw new AuthenticationCredentialsNotFoundException("JWT was expired or incorrect");
+        }
+    }
+
+    public String getUsernameFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
+
+    public Integer getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("userId", Integer.class);
+    }
+}
