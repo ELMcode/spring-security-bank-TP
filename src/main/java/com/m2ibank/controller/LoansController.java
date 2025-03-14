@@ -2,6 +2,7 @@ package com.m2ibank.controller;
 
 import com.m2ibank.model.Loans;
 import com.m2ibank.repository.LoanRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +15,12 @@ public class LoansController {
     private LoanRepository loanRepository;
 
     @GetMapping("/myLoans")
-    public List<Loans> getLoanDetails(@RequestParam int id) {
-        List<Loans> loans = loanRepository.findByCustomerIdOrderByStartDtDesc(id);
-        if (loans != null ) {
+    public List<Loans> getLoanDetails(HttpServletRequest request) {
+        Integer userId = (Integer) request.getAttribute("userId");
+        List<Loans> loans = loanRepository.findByCustomerIdOrderByStartDtDesc(userId);
+        if (loans != null) {
             return loans;
-        }else {
+        } else {
             return null;
         }
     }
@@ -27,6 +29,5 @@ public class LoansController {
     public Loans createLoan(@RequestBody Loans loan) {
         return loanRepository.save(loan);
     }
-
 
 }
